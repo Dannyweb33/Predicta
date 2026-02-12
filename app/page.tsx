@@ -9,6 +9,7 @@ import { BetDialog } from "@/components/bet-dialog"
 import { PortfolioView } from "@/components/portfolio-view"
 import { LeaderboardView } from "@/components/leaderboard-view"
 import { ContractWarning } from "@/components/contract-warning"
+import { WalletConnectWarning } from "@/components/walletconnect-warning"
 import type { Market } from "@/lib/market-data"
 
 export default function Page() {
@@ -26,6 +27,7 @@ export default function Page() {
       <Header activePage={activePage} onNavigate={setActivePage} />
 
       <main className="mx-auto max-w-7xl px-4 py-6 lg:px-6">
+        <WalletConnectWarning />
         <ContractWarning />
         {activePage === "markets" && (
           <>
@@ -37,7 +39,7 @@ export default function Page() {
 
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
                   <h3 className="text-sm font-semibold text-primary">
-                    How ArcSignal Works
+                    How Predicta Works
                   </h3>
                   <ul className="mt-3 space-y-2">
                     <li className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">

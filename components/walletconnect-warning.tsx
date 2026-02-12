@@ -1,0 +1,31 @@
+'use client';
+
+import { AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+export function WalletConnectWarning() {
+  const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+
+  if (projectId && projectId !== '00000000000000000000000000000000') {
+    return null;
+  }
+
+  return (
+    <Alert className="mx-auto max-w-7xl mb-4 border-yellow-500/50 bg-yellow-500/10">
+      <AlertTriangle className="h-4 w-4 text-yellow-500" />
+      <AlertTitle className="text-yellow-500">WalletConnect não configurado</AlertTitle>
+      <AlertDescription className="text-yellow-500/80">
+        Para conectar carteiras, configure o NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID no arquivo .env.local.
+        <br />
+        <a 
+          href="https://cloud.walletconnect.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="underline hover:text-yellow-400"
+        >
+          Obtenha seu Project ID aqui
+        </a>
+      </AlertDescription>
+    </Alert>
+  );
+}

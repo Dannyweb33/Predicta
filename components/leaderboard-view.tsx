@@ -9,18 +9,22 @@ import {
   Users,
   Crown,
   ArrowUpRight,
+  Loader2,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { useLeaderboardFromMarkets } from "@/hooks/useLeaderboard"
 import {
-  LEADERBOARD,
   formatUSDC,
   getBadgeLabel,
   getBadgeColor,
 } from "@/lib/market-data"
 
 export function LeaderboardView() {
-  const top3 = LEADERBOARD.slice(0, 3)
-  const rest = LEADERBOARD.slice(3)
+  const { entries, isLoading } = useLeaderboardFromMarkets()
+  
+  // For now, show empty state since we need events to track all users efficiently
+  const top3 = entries.slice(0, 3)
+  const rest = entries.slice(3)
 
   return (
     <div>
@@ -28,9 +32,25 @@ export function LeaderboardView() {
       <div>
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Leaderboard</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Top traders ranked by profit on ArcSignal prediction markets
+          Top traders ranked by profit on Predicta prediction markets
         </p>
       </div>
+
+      {isLoading ? (
+        <div className="mt-12 flex flex-col items-center justify-center text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <p className="mt-3 text-sm font-medium text-foreground">Loading leaderboard...</p>
+        </div>
+      ) : entries.length === 0 ? (
+        <div className="mt-12 flex flex-col items-center justify-center text-center">
+          <Trophy className="h-12 w-12 text-muted-foreground/50" />
+          <p className="mt-3 text-sm font-medium text-foreground">No leaderboard data yet</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Leaderboard will appear once markets are resolved and payouts are claimed
+          </p>
+        </div>
+      ) : (
+        <>
 
       {/* Leaderboard stats */}
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -42,7 +62,7 @@ export function LeaderboardView() {
             <p className="text-xs text-muted-foreground">Top Profit</p>
           </div>
           <p className="mt-3 font-mono text-xl font-bold text-foreground">
-            {formatUSDC(LEADERBOARD[0].totalProfit)}
+            {entries.length > 0 ? formatUSDC(entries[0].totalProfit) : "0"}
             <span className="ml-1 text-xs font-normal text-muted-foreground">USDC</span>
           </p>
         </div>
@@ -55,7 +75,7 @@ export function LeaderboardView() {
             <p className="text-xs text-muted-foreground">Best Win Rate</p>
           </div>
           <p className="mt-3 font-mono text-xl font-bold text-foreground">
-            {LEADERBOARD[0].winRate}%
+            {entries.length > 0 ? entries[0].winRate.toFixed(0) : "0"}%
           </p>
         </div>
 
@@ -67,7 +87,7 @@ export function LeaderboardView() {
             <p className="text-xs text-muted-foreground">Total Volume</p>
           </div>
           <p className="mt-3 font-mono text-xl font-bold text-foreground">
-            {formatUSDC(LEADERBOARD.reduce((s, e) => s + e.volume, 0))}
+            {formatUSDC(entries.reduce((s, e) => s + e.volume, 0))}
             <span className="ml-1 text-xs font-normal text-muted-foreground">USDC</span>
           </p>
         </div>
@@ -80,7 +100,7 @@ export function LeaderboardView() {
             <p className="text-xs text-muted-foreground">Total Traders</p>
           </div>
           <p className="mt-3 font-mono text-xl font-bold text-foreground">
-            {LEADERBOARD.length}
+            {entries.length}
             <span className="ml-1 text-xs font-normal text-muted-foreground">ranked</span>
           </p>
         </div>
@@ -164,7 +184,7 @@ export function LeaderboardView() {
 
         {/* Table rows */}
         <div className="divide-y divide-border/30">
-          {LEADERBOARD.map((entry) => (
+          {entries.map((entry) => (
             <div
               key={entry.address}
               className="flex flex-col gap-2 px-5 py-3.5 transition-colors hover:bg-secondary/20 sm:grid sm:grid-cols-[48px_1fr_120px_80px_80px_100px_60px] sm:items-center sm:gap-2"
@@ -239,6 +259,8 @@ export function LeaderboardView() {
           ))}
         </div>
       </div>
+        </>
+      )}
     </div>
   )
 }

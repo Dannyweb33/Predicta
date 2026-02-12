@@ -131,7 +131,6 @@ export function BetDialog({ market, open, onOpenChange }: BetDialogProps) {
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
-      setConfirmed(false)
       setAmount("")
       setSide("yes")
     }

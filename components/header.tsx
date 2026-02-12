@@ -1,12 +1,14 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 
-import { Activity, Wallet, Zap, BarChart3, Trophy, TrendingUp } from "lucide-react"
+import { Activity, Wallet, Zap, BarChart3, Trophy, TrendingUp, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useAccount } from "wagmi"
+import { useIsOwner } from "@/hooks/useCreateMarket"
+import { CreateMarketDialog } from "@/components/create-market-dialog"
 
 export type AppPage = "markets" | "portfolio" | "leaderboard"
 
@@ -23,6 +25,8 @@ const NAV_ITEMS: { page: AppPage; label: string; icon: React.ElementType }[] = [
 
 export function Header({ activePage, onNavigate }: HeaderProps) {
   const { isConnected } = useAccount()
+  const { isOwner } = useIsOwner()
+  const [createMarketOpen, setCreateMarketOpen] = useState(false)
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
@@ -38,7 +42,7 @@ export function Header({ activePage, onNavigate }: HeaderProps) {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-foreground tracking-tight">
-                ArcSignal
+                Predicta
               </span>
               <Badge
                 variant="outline"
@@ -66,6 +70,16 @@ export function Header({ activePage, onNavigate }: HeaderProps) {
               {item.label}
             </button>
           ))}
+          {isOwner && isConnected && (
+            <Button
+              onClick={() => setCreateMarketOpen(true)}
+              size="sm"
+              className="ml-2 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Create Market
+            </Button>
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -199,6 +213,7 @@ export function Header({ activePage, onNavigate }: HeaderProps) {
           </button>
         ))}
       </div>
+      <CreateMarketDialog open={createMarketOpen} onOpenChange={setCreateMarketOpen} />
     </header>
   )
 }

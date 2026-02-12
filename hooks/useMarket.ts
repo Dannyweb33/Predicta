@@ -1,7 +1,7 @@
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { useAccount } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
-import { ARC_SIGNAL_MARKET_ABI, MOCK_USDC_ABI, getContractAddresses } from '@/lib/contracts';
+import { ARC_SIGNAL_MARKET_ABI, USDC_ABI, getContractAddresses } from '@/lib/contracts';
 import { toast } from 'sonner';
 
 export function useMarketContract() {
@@ -105,7 +105,7 @@ export function useApproveUSDC() {
 
       await writeContract({
         address: usdc,
-        abi: MOCK_USDC_ABI,
+        abi: USDC_ABI,
         functionName: 'approve',
         args: [market, maxApproval],
       });
@@ -131,7 +131,7 @@ export function useUSDCBalance() {
 
   const { data: balance, refetch: refetchBalance } = useReadContract({
     address: usdc,
-    abi: MOCK_USDC_ABI,
+    abi: USDC_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: {
@@ -152,7 +152,7 @@ export function useUSDCAllowance() {
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: usdc,
-    abi: MOCK_USDC_ABI,
+    abi: USDC_ABI,
     functionName: 'allowance',
     args: address ? [address, market] : undefined,
     query: {

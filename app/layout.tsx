@@ -9,7 +9,7 @@ const _inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const _jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' })
 
 export const metadata: Metadata = {
-  title: 'ArcSignal - USDC Prediction Markets on ARC',
+  title: 'Predicta - USDC Prediction Markets on ARC',
   description: 'USDC-native prediction market designed for ARC ecosystem metrics. Bet on TVL, protocol launches, and USDC supply milestones.',
 }
 
@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${_inter.variable} ${_jetbrains.variable}`}>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

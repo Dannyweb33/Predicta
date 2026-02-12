@@ -1,11 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Search, SlidersHorizontal } from "lucide-react"
+import React from "react"
+import { Search, SlidersHorizontal, Loader2, Plus, RefreshCw } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MarketCard } from "@/components/market-card"
-import { MARKETS, type Market } from "@/lib/market-data"
+import { useAllMarkets } from "@/hooks/useMarkets"
+import { useIsOwner } from "@/hooks/useCreateMarket"
+import { useAccount } from "wagmi"
+import { CreateMarketDialog } from "@/components/create-market-dialog"
+import { type Market, getCategoryLabel } from "@/lib/market-data"
 
 interface MarketListProps {
   onSelectMarket: (market: Market) => void
@@ -16,11 +22,22 @@ type FilterCategory = "all" | "tvl" | "protocol" | "supply" | "governance" | "ec
 export function MarketList({ onSelectMarket }: MarketListProps) {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<FilterCategory>("all")
+  const [createMarketOpen, setCreateMarketOpen] = useState(false)
+  const { markets, isLoading, refetch, count } = useAllMarkets()
+  const { isOwner } = useIsOwner()
+  const { isConnected } = useAccount()
 
-  const filteredMarkets = MARKETS.filter((market) => {
-    const matchesSearch = market.question
-      .toLowerCase()
-      .includes(search.toLowerCase())
+  // Debug: log count and markets
+  React.useEffect(() => {
+    console.log('Market count:', count, 'Markets:', markets.length)
+  }, [count, markets.length])
+
+  const filteredMarkets = markets.filter((market) => {
+    const searchLower = search.toLowerCase();
+    const matchesSearch = 
+      market.question.toLowerCase().includes(searchLower) ||
+      market.category.toLowerCase().includes(searchLower) ||
+      getCategoryLabel(market.category).toLowerCase().includes(searchLower);
     const matchesCategory =
       category === "all" || market.category === category
     return matchesSearch && matchesCategory
@@ -34,11 +51,31 @@ export function MarketList({ onSelectMarket }: MarketListProps) {
             Prediction Markets
           </h2>
           <p className="text-xs text-muted-foreground">
-            {filteredMarkets.length} markets available
+            {isLoading ? "Loading..." : `${filteredMarkets.length} markets available (Total: ${count})`}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            onClick={() => refetch()}
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          {isOwner && isConnected && (
+            <Button
+              onClick={() => setCreateMarketOpen(true)}
+              size="sm"
+              className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Create Market
+            </Button>
+          )}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -85,29 +122,45 @@ export function MarketList({ onSelectMarket }: MarketListProps) {
         </TabsList>
       </Tabs>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {filteredMarkets.map((market) => (
-          <MarketCard
-            key={market.id}
-            market={market}
-            onSelect={onSelectMarket}
-          />
-        ))}
-      </div>
-
-      {filteredMarkets.length === 0 && (
+      {isLoading ? (
         <div className="mt-12 flex flex-col items-center justify-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
-            <Search className="h-5 w-5 text-muted-foreground" />
-          </div>
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           <p className="mt-3 text-sm font-medium text-foreground">
-            No markets found
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Try adjusting your search or filter criteria
+            Loading markets...
           </p>
         </div>
+      ) : (
+        <>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {filteredMarkets.map((market) => (
+              <MarketCard
+                key={market.id}
+                market={market}
+                onSelect={onSelectMarket}
+              />
+            ))}
+          </div>
+
+          {filteredMarkets.length === 0 && (
+            <div className="mt-12 flex flex-col items-center justify-center text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                <Search className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <p className="mt-3 text-sm font-medium text-foreground">
+                No markets found
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {markets.length === 0 && count === 0
+                  ? "No markets have been created yet"
+                  : markets.length === 0 && count > 0
+                  ? `Found ${count} markets but unable to load details. Try refreshing.`
+                  : "Try adjusting your search or filter criteria"}
+              </p>
+            </div>
+          )}
+        </>
       )}
+      <CreateMarketDialog open={createMarketOpen} onOpenChange={setCreateMarketOpen} />
     </div>
   )
 }

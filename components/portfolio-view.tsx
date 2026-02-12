@@ -10,26 +10,42 @@ import {
   CheckCircle2,
   XCircle,
   ArrowUpRight,
+  Loader2,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useAccount } from "wagmi"
+import { usePortfolio } from "@/hooks/usePortfolio"
 import {
-  MARKETS,
-  PORTFOLIO_POSITIONS,
-  PORTFOLIO_HISTORY,
-  getPortfolioStats,
   getImpliedOdds,
   formatUSDC,
   getCategoryLabel,
 } from "@/lib/market-data"
 
 export function PortfolioView() {
-  const stats = getPortfolioStats()
+  const { isConnected } = useAccount()
+  const { stats, activePositions, resolvedPositions, isLoading } = usePortfolio()
 
-  const activePositions = PORTFOLIO_POSITIONS.filter((p) => p.status === "active")
-  const resolvedPositions = PORTFOLIO_POSITIONS.filter(
-    (p) => p.status === "won" || p.status === "lost"
-  )
+  if (!isConnected) {
+    return (
+      <div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Portfolio</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Track your positions, P&L, and betting history
+            </p>
+          </div>
+        </div>
+        <div className="mt-12 flex flex-col items-center justify-center text-center">
+          <Wallet className="h-12 w-12 text-muted-foreground/50" />
+          <p className="mt-3 text-sm font-medium text-foreground">
+            Connect your wallet to view your portfolio
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -46,6 +62,14 @@ export function PortfolioView() {
           Deposit USDC
         </Button>
       </div>
+
+      {isLoading ? (
+        <div className="mt-12 flex flex-col items-center justify-center text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <p className="mt-3 text-sm font-medium text-foreground">Loading portfolio...</p>
+        </div>
+      ) : (
+        <>
 
       {/* Summary cards */}
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -96,7 +120,7 @@ export function PortfolioView() {
               {stats.winRate.toFixed(0)}%
             </p>
             <span className="text-xs text-muted-foreground">
-              {PORTFOLIO_POSITIONS.filter((p) => p.status === "won").length}W / {PORTFOLIO_POSITIONS.filter((p) => p.status === "lost").length}L
+              {resolvedPositions.filter((p) => p.status === "won").length}W / {resolvedPositions.filter((p) => p.status === "lost").length}L
             </span>
           </div>
         </div>
@@ -133,8 +157,8 @@ export function PortfolioView() {
         </div>
 
         {/* Simple sparkline chart */}
-        <div className="mt-4 h-40">
-          <PortfolioChart data={PORTFOLIO_HISTORY} />
+        <div className="mt-4 h-40 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">Chart coming soon</p>
         </div>
       </div>
 
@@ -147,9 +171,14 @@ export function PortfolioView() {
         </div>
 
         <div className="mt-3 space-y-2">
-          {activePositions.map((position) => {
-            const market = MARKETS.find((m) => m.id === position.marketId)
-            if (!market) return null
+          {activePositions.length === 0 ? (
+            <div className="rounded-xl border border-border/50 bg-card p-8 text-center">
+              <p className="text-sm text-muted-foreground">No active positions</p>
+            </div>
+          ) : (
+            activePositions.map((position) => {
+              const market = position.market
+              if (!market) return null
 
             const odds = getImpliedOdds(market.totalYes, market.totalNo)
             const currentOdds = position.side === "yes" ? odds.yes : odds.no
@@ -243,7 +272,8 @@ export function PortfolioView() {
                 </div>
               </div>
             )
-          })}
+          })
+          )}
         </div>
       </div>
 
@@ -255,9 +285,14 @@ export function PortfolioView() {
           </h2>
 
           <div className="mt-3 space-y-2">
-            {resolvedPositions.map((position) => {
-              const market = MARKETS.find((m) => m.id === position.marketId)
-              if (!market) return null
+            {resolvedPositions.length === 0 ? (
+              <div className="rounded-xl border border-border/50 bg-card/50 p-8 text-center">
+                <p className="text-sm text-muted-foreground">No resolved positions</p>
+              </div>
+            ) : (
+              resolvedPositions.map((position) => {
+                const market = position.market
+                if (!market) return null
 
               const isWon = position.status === "won"
               const pnl = isWon
@@ -330,9 +365,12 @@ export function PortfolioView() {
                   </div>
                 </div>
               )
-            })}
+            })
+            )}
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   )

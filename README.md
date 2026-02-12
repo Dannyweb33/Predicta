@@ -1,6 +1,6 @@
-# ArcSignal - Prediction Markets on Arc Testnet
+# Predicta - Prediction Markets on Arc Testnet
 
-ArcSignal é uma plataforma de mercados de previsão (prediction markets) construída para o ecossistema Arc, permitindo apostas em eventos do ecossistema usando USDC.
+Predicta é uma plataforma de mercados de previsão (prediction markets) construída para o ecossistema Arc, permitindo apostas em eventos do ecossistema usando USDC.
 
 ## 🚀 Funcionalidades
 

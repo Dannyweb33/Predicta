@@ -1,16 +1,17 @@
 "use client"
 
-import { TrendingUp, TrendingDown, ExternalLink } from "lucide-react"
+import { TrendingUp, TrendingDown, ExternalLink, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  MARKETS,
-  USER_POSITIONS,
-  formatUSDC,
-} from "@/lib/market-data"
+import { useUserPositions } from "@/hooks/useUserPositions"
+import { useAllMarkets } from "@/hooks/useMarkets"
+import { formatUSDC } from "@/lib/market-data"
 
 export function PositionsPanel() {
-  const totalBet = USER_POSITIONS.reduce((acc, p) => acc + p.amount, 0)
-  const totalPotential = USER_POSITIONS.reduce(
+  const { positions, isLoading } = useUserPositions()
+  const { markets } = useAllMarkets()
+
+  const totalBet = positions.reduce((acc, p) => acc + p.amount, 0)
+  const totalPotential = positions.reduce(
     (acc, p) => acc + p.potentialPayout,
     0
   )
@@ -23,7 +24,7 @@ export function PositionsPanel() {
             Your Positions
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {USER_POSITIONS.length} active bets
+            {isLoading ? "Loading..." : `${positions.length} active bets`}
           </p>
         </div>
         <div className="flex gap-4 text-right">
@@ -47,63 +48,76 @@ export function PositionsPanel() {
       </div>
 
       <div className="divide-y divide-border/30">
-        {USER_POSITIONS.map((position) => {
-          const market = MARKETS.find((m) => m.id === position.marketId)
-          if (!market) return null
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : positions.length === 0 ? (
+          <div className="px-5 py-8 text-center">
+            <p className="text-sm text-muted-foreground">No active positions</p>
+            <p className="mt-1 text-xs text-muted-foreground/70">
+              Place a bet to see your positions here
+            </p>
+          </div>
+        ) : (
+          positions.map((position) => {
+            const market = markets.find((m) => m.id === position.marketId)
+            if (!market) return null
 
-          const pnl = position.potentialPayout - position.amount
-          const pnlPercent = ((pnl / position.amount) * 100).toFixed(1)
+            const pnl = position.potentialPayout - position.amount
+            const pnlPercent = ((pnl / position.amount) * 100).toFixed(1)
 
-          return (
-            <div
-              key={`${position.marketId}-${position.side}`}
-              className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-secondary/30"
-            >
+            return (
               <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                  position.side === "yes"
-                    ? "bg-accent/10 text-accent"
-                    : "bg-destructive/10 text-destructive"
-                }`}
+                key={`${position.marketId}-${position.side}`}
+                className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-secondary/30"
               >
-                {position.side === "yes" ? (
-                  <TrendingUp className="h-4 w-4" />
-                ) : (
-                  <TrendingDown className="h-4 w-4" />
-                )}
-              </div>
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                    position.side === "yes"
+                      ? "bg-accent/10 text-accent"
+                      : "bg-destructive/10 text-destructive"
+                  }`}
+                >
+                  {position.side === "yes" ? (
+                    <TrendingUp className="h-4 w-4" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" />
+                  )}
+                </div>
 
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium text-foreground">
-                  {market.question}
-                </p>
-                <div className="mt-0.5 flex items-center gap-2">
-                  <span
-                    className={`font-mono text-[10px] font-semibold ${
-                      position.side === "yes"
-                        ? "text-accent"
-                        : "text-destructive"
-                    }`}
-                  >
-                    {position.side.toUpperCase()}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {formatUSDC(position.amount)} USDC
-                  </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-medium text-foreground">
+                    {market.question}
+                  </p>
+                  <div className="mt-0.5 flex items-center gap-2">
+                    <span
+                      className={`font-mono text-[10px] font-semibold ${
+                        position.side === "yes"
+                          ? "text-accent"
+                          : "text-destructive"
+                      }`}
+                    >
+                      {position.side.toUpperCase()}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {formatUSDC(position.amount)} USDC
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <p className="font-mono text-xs font-semibold text-foreground">
+                    {formatUSDC(position.potentialPayout)}
+                  </p>
+                  <p className="font-mono text-[10px] text-accent">
+                    +{pnlPercent}%
+                  </p>
                 </div>
               </div>
-
-              <div className="text-right shrink-0">
-                <p className="font-mono text-xs font-semibold text-foreground">
-                  {formatUSDC(position.potentialPayout)}
-                </p>
-                <p className="font-mono text-[10px] text-accent">
-                  +{pnlPercent}%
-                </p>
-              </div>
-            </div>
-          )
-        })}
+            )
+          })
+        )}
       </div>
 
       <div className="border-t border-border/50 px-5 py-3">
