@@ -1,51 +1,51 @@
 # Predicta - Prediction Markets on Arc Testnet
 
-Predicta é uma plataforma de mercados de previsão (prediction markets) construída para o ecossistema Arc, permitindo apostas em eventos do ecossistema usando USDC.
+Predicta is a prediction markets platform built for the Arc ecosystem, allowing bets on ecosystem events using USDC.
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-- **Mercados de Previsão**: Crie e participe de mercados sobre eventos do ecossistema Arc
-- **Apostas com USDC**: Aposte usando USDC (6 decimais) em resultados YES/NO
-- **Cálculo Automático de Odds**: Sistema de market maker com produto constante
-- **Portfolio Tracking**: Acompanhe suas posições e histórico de apostas
-- **Leaderboard**: Ranking dos melhores apostadores
-- **Rainbow Kit Integration**: Conexão fácil com carteiras via Rainbow Kit
+- **Prediction Markets**: Create and participate in markets about Arc ecosystem events
+- **USDC Betting**: Bet using USDC (6 decimals) on YES/NO outcomes
+- **Automatic Odds Calculation**: Constant product market maker system
+- **Portfolio Tracking**: Track your positions and betting history
+- **Leaderboard**: Ranking of top bettors
+- **Rainbow Kit Integration**: Easy wallet connection via Rainbow Kit
 
-## 📋 Pré-requisitos
+## 📋 Prerequisites
 
-- Node.js 18+ e pnpm
-- Foundry (para compilar e fazer deploy dos contratos)
-- Carteira MetaMask ou compatível com WalletConnect
-- USDC na Arc Testnet (pode usar MockUSDC para testes)
+- Node.js 18+ and pnpm
+- Foundry (to compile and deploy contracts)
+- MetaMask wallet or compatible with WalletConnect
+- USDC on Arc Testnet (can use MockUSDC for testing)
 
-## 🛠️ Instalação
+## 🛠️ Installation
 
-### 1. Instalar dependências do frontend
+### 1. Install frontend dependencies
 
 ```bash
 pnpm install
 ```
 
-### 2. Instalar dependências do Foundry
+### 2. Install Foundry dependencies
 
 ```bash
-# Instalar Foundry (se ainda não tiver)
+# Install Foundry (if you don't have it yet)
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 
-# Instalar dependências do OpenZeppelin
+# Install OpenZeppelin dependencies
 forge install OpenZeppelin/openzeppelin-contracts
 ```
 
-### 3. Configurar variáveis de ambiente
+### 3. Configure environment variables
 
-Copie o arquivo `.env.local.example` para `.env.local`:
+Copy the `.env.local.example` file to `.env.local`:
 
 ```bash
 cp .env.local.example .env.local
 ```
 
-Edite `.env.local` e configure:
+Edit `.env.local` and configure:
 
 ```env
 # Arc Testnet Configuration
@@ -61,57 +61,57 @@ NEXT_PUBLIC_USDC_CONTRACT_ADDRESS=
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=
 ```
 
-## 📝 Deploy dos Contratos
+## 📝 Contract Deployment
 
-### 1. Compilar os contratos
+### 1. Compile contracts
 
 ```bash
 forge build
 ```
 
-### 2. Fazer deploy
+### 2. Deploy
 
-Certifique-se de ter uma chave privada configurada em `.env.local`:
+Make sure you have a private key configured in `.env.local`:
 
 ```env
-PRIVATE_KEY=sua_chave_privada_aqui
+PRIVATE_KEY=your_private_key_here
 ```
 
-Depois execute:
+Then run:
 
 ```bash
 forge script script/Deploy.s.sol:DeployScript --rpc-url $NEXT_PUBLIC_ARC_RPC_URL --broadcast --verify -vvvv
 ```
 
-Após o deploy, copie os endereços dos contratos para `.env.local`:
+After deployment, copy the contract addresses to `.env.local`:
 
 ```env
 NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS=0x...
 NEXT_PUBLIC_USDC_CONTRACT_ADDRESS=0x...
 ```
 
-### 3. Obter USDC de teste
+### 3. Get test USDC
 
-O contrato MockUSDC permite mintar tokens para qualquer endereço. Você pode usar uma função `mint` diretamente no contrato ou criar um script helper.
+The MockUSDC contract allows minting tokens to any address. You can use a `mint` function directly on the contract or create a helper script.
 
-## 🏃 Executar o projeto
+## 🏃 Running the Project
 
-### Modo desenvolvimento
+### Development mode
 
 ```bash
 pnpm dev
 ```
 
-Acesse [http://localhost:3000](http://localhost:3000)
+Access [http://localhost:3000](http://localhost:3000)
 
-### Build para produção
+### Production build
 
 ```bash
 pnpm build
 pnpm start
 ```
 
-## 📚 Estrutura do Projeto
+## 📚 Project Structure
 
 ```
 predicta/
@@ -138,51 +138,51 @@ predicta/
     └── Deploy.s.sol        # Script de deploy Foundry
 ```
 
-## 🔐 Segurança
+## 🔐 Security
 
-- ✅ ReentrancyGuard para prevenir ataques de reentrância
-- ✅ SafeERC20 para operações seguras com tokens
-- ✅ Validações de entrada em todas as funções públicas
-- ✅ Controle de acesso com Ownable
-- ✅ Taxa de 2% para sustentabilidade do protocolo
+- ✅ ReentrancyGuard to prevent reentrancy attacks
+- ✅ SafeERC20 for secure token operations
+- ✅ Input validation on all public functions
+- ✅ Access control with Ownable
+- ✅ 2% fee for protocol sustainability
 
-## 📖 Como Usar
+## 📖 How to Use
 
-1. **Conectar Wallet**: Clique em "Connect Wallet" no header
-2. **Navegar Mercados**: Veja os mercados ativos na página principal
-3. **Fazer Aposta**: Clique em um mercado e escolha YES ou NO
-4. **Aprovar USDC**: Na primeira vez, você precisará aprovar o contrato para gastar USDC
-5. **Confirmar Aposta**: Confirme a transação na sua carteira
-6. **Acompanhar Portfolio**: Veja suas posições na aba Portfolio
+1. **Connect Wallet**: Click "Connect Wallet" in the header
+2. **Browse Markets**: View active markets on the main page
+3. **Place Bet**: Click on a market and choose YES or NO
+4. **Approve USDC**: The first time, you'll need to approve the contract to spend USDC
+5. **Confirm Bet**: Confirm the transaction in your wallet
+6. **Track Portfolio**: View your positions in the Portfolio tab
 
-## 🧪 Testes
+## 🧪 Testing
 
-Para testar os contratos:
+To test the contracts:
 
 ```bash
 forge test
 ```
 
-## 📝 Notas Importantes
+## 📝 Important Notes
 
-- O projeto usa MockUSDC para testes. Em produção, substitua pelo contrato USDC real
-- A rede configurada é Arc Testnet. Para mainnet, atualize as configurações
-- Certifique-se de ter USDC (sUUSDC) na carteira para pagar gas fees e fazer apostas
-- Os mercados precisam ser resolvidos manualmente pelo owner do contrato
+- The project uses MockUSDC for testing. In production, replace with the real USDC contract
+- The configured network is Arc Testnet. For mainnet, update the configurations
+- Make sure you have USDC (sUUSDC) in your wallet to pay gas fees and place bets
+- Markets need to be resolved manually by the contract owner
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob a licença MIT.
+This project is licensed under the MIT License.
 
-## 🔗 Links Úteis
+## 🔗 Useful Links
 
 - [Arc Network](https://arc.network)
 - [Rainbow Kit](https://rainbowkit.com)
