@@ -167,7 +167,7 @@ forge test
 
 - O projeto usa MockUSDC para testes. Em produção, substitua pelo contrato USDC real
 - A rede configurada é Arc Testnet. Para mainnet, atualize as configurações
-- Certifique-se de ter ETH na carteira para pagar gas fees
+- Certifique-se de ter USDC (sUUSDC) na carteira para pagar gas fees e fazer apostas
 - Os mercados precisam ser resolvidos manualmente pelo owner do contrato
 
 ## 🤝 Contribuindo

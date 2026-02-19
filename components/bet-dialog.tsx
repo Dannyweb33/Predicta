@@ -33,6 +33,7 @@ import {
   useUSDCBalance,
   useUSDCAllowance,
   useCalculatePayout,
+  useClaimPayout,
 } from "@/hooks/useMarket"
 import { toast } from "sonner"
 
@@ -55,6 +56,7 @@ export function BetDialog({ market, open, onOpenChange }: BetDialogProps) {
   const { allowance, refetchAllowance } = useUSDCAllowance()
   const { approve, isPending: isApproving, isSuccess: approveSuccess } = useApproveUSDC()
   const { placeBet, isPending: isPlacingBet, isSuccess: betSuccess, hash } = usePlaceBet()
+  const { claim, isPending: isClaiming, isSuccess: claimSuccess } = useClaimPayout()
   const { payout } = useCalculatePayout(
     market?.id ?? null,
     side === "yes" ? 0 : 1,
@@ -91,6 +93,14 @@ export function BetDialog({ market, open, onOpenChange }: BetDialogProps) {
     }
   }, [betSuccess, onOpenChange])
 
+  // Handle claim success
+  useEffect(() => {
+    if (claimSuccess) {
+      toast.success("Payout claimed successfully!")
+      onOpenChange(false)
+    }
+  }, [claimSuccess, onOpenChange])
+
   if (!market) return null
 
   const odds = getImpliedOdds(market.totalYes, market.totalNo)
@@ -98,12 +108,15 @@ export function BetDialog({ market, open, onOpenChange }: BetDialogProps) {
   const yesPercent = totalPool > 0 ? (market.totalYes / totalPool) * 100 : 50
 
   const deadlineDate = new Date(market.deadline)
+  const now = new Date()
   const daysLeft = Math.max(
     0,
     Math.ceil(
-      (deadlineDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+      (deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
     )
   )
+  const isClosed = market.status === "closed" || now >= deadlineDate.getTime()
+  const isResolved = market.status === "resolved"
 
   const handleApprove = async () => {
     if (!isConnected) {
@@ -149,8 +162,24 @@ export function BetDialog({ market, open, onOpenChange }: BetDialogProps) {
               {getCategoryLabel(market.category)}
             </Badge>
             <div className="flex items-center gap-1 text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span className="font-mono text-[10px]">{daysLeft}d left</span>
+              {isResolved ? (
+                <CheckCircle2 className="h-3 w-3 text-accent" />
+              ) : isClosed ? (
+                <Clock className="h-3 w-3 text-yellow-500" />
+              ) : (
+                <Clock className="h-3 w-3" />
+              )}
+              <span className="font-mono text-[10px]">
+                {isResolved
+                  ? market.outcome
+                    ? "YES Won"
+                    : "NO Won"
+                  : isClosed
+                  ? "Closed"
+                  : daysLeft > 0
+                  ? `${daysLeft}d left`
+                  : "Ended"}
+              </span>
             </div>
           </div>
           <DialogTitle className="text-foreground text-base leading-snug text-pretty">
@@ -188,7 +217,54 @@ export function BetDialog({ market, open, onOpenChange }: BetDialogProps) {
           </div>
         </div>
 
-        {betSuccess ? (
+        {isClosed || isResolved ? (
+          <div className="flex flex-col items-center gap-3 py-6">
+            <div className={`flex h-14 w-14 items-center justify-center rounded-full ${
+              isResolved ? "bg-accent/10" : "bg-yellow-500/10"
+            }`}>
+              {isResolved ? (
+                <CheckCircle2 className={`h-7 w-7 ${market.outcome ? "text-accent" : "text-destructive"}`} />
+              ) : (
+                <Clock className="h-7 w-7 text-yellow-500" />
+              )}
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {isResolved
+                  ? `Market Resolved: ${market.outcome ? "YES" : "NO"} Won`
+                  : "Market Closed"}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {isResolved
+                  ? "You can claim your payout if you won"
+                  : "This market has closed. Waiting for resolution."}
+              </p>
+            </div>
+            {isResolved && (
+              <Button
+                onClick={async () => {
+                  if (!isConnected) {
+                    toast.error("Please connect your wallet")
+                    return
+                  }
+                  if (!market) return
+                  await claim(market.id)
+                }}
+                disabled={isClaiming || !isConnected}
+                className="mt-2 bg-accent text-accent-foreground hover:bg-accent/90"
+              >
+                {isClaiming ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Claiming...
+                  </>
+                ) : (
+                  "Claim Payout"
+                )}
+              </Button>
+            )}
+          </div>
+        ) : betSuccess ? (
           <div className="flex flex-col items-center gap-3 py-6">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
               <CheckCircle2 className="h-7 w-7 text-accent" />
@@ -340,7 +416,7 @@ export function BetDialog({ market, open, onOpenChange }: BetDialogProps) {
             ) : (
               <Button
                 onClick={handlePlaceBet}
-                disabled={betAmount <= 0 || isPlacingBet || !isConnected || needsApproval}
+                disabled={betAmount <= 0 || isPlacingBet || !isConnected || needsApproval || isClosed || isResolved}
                 className={`w-full font-semibold ${
                   side === "yes"
                     ? "bg-accent text-accent-foreground hover:bg-accent/90"
@@ -352,6 +428,8 @@ export function BetDialog({ market, open, onOpenChange }: BetDialogProps) {
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Placing bet...
                   </>
+                ) : isClosed || isResolved ? (
+                  isClosed ? "Market Closed" : "Market Resolved"
                 ) : betAmount > 0 ? (
                   `Place ${formatUSDC(betAmount)} USDC on ${side.toUpperCase()}`
                 ) : (

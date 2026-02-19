@@ -31,13 +31,13 @@ export function useAllMarkets() {
   const configured = isContractConfigured();
   const { count, refetchCount } = useMarketCount();
 
-  // Criar array de IDs de mercado - usar useMemo para recalcular quando count muda
+  // Create array of market IDs - use useMemo to recalculate when count changes
   const marketIds = React.useMemo(
     () => Array.from({ length: count }, (_, i) => BigInt(i)),
     [count]
   );
 
-  // Buscar todos os mercados em paralelo - usar useMemo para recalcular quando count muda
+  // Fetch all markets in parallel - use useMemo to recalculate when count changes
   const contracts = React.useMemo(
     () =>
       marketIds.map((marketId) => ({

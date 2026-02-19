@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { useAccount } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
@@ -169,10 +170,23 @@ export function useUSDCAllowance() {
 
 export function useClaimPayout() {
   const { market } = getContractAddresses();
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { writeContract, data: hash, isPending, error, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
+
+  useEffect(() => {
+    if (isSuccess && hash) {
+      toast.success('Payout claimed successfully!');
+      reset();
+    }
+  }, [isSuccess, hash, reset]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || 'Failed to claim payout');
+    }
+  }, [error]);
 
   const claim = async (marketId: number) => {
     try {
@@ -184,14 +198,13 @@ export function useClaimPayout() {
       });
     } catch (err) {
       console.error('Error claiming payout:', err);
-      toast.error('Failed to claim payout');
+      // Error toast is handled by useEffect above
     }
   };
 
   return {
     claim,
-    isPending,
-    isConfirming,
+    isPending: isPending || isConfirming,
     isSuccess,
     error,
     hash,

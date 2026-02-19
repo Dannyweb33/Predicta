@@ -46,6 +46,10 @@ export function MarketCard({ market, onSelect }: MarketCardProps) {
             <Badge className="bg-accent/10 text-accent border-accent/20 text-[10px] px-1.5 py-0">
               Resolved
             </Badge>
+          ) : market.status === "closed" ? (
+            <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 text-[10px] px-1.5 py-0">
+              Closed
+            </Badge>
           ) : (
             <Badge
               variant="outline"
@@ -58,6 +62,8 @@ export function MarketCard({ market, onSelect }: MarketCardProps) {
         <div className="flex items-center gap-1 text-muted-foreground">
           {market.status === "resolved" ? (
             <CheckCircle2 className="h-3.5 w-3.5 text-accent" />
+          ) : market.status === "closed" ? (
+            <Clock className="h-3.5 w-3.5 text-yellow-500" />
           ) : (
             <Clock className="h-3.5 w-3.5" />
           )}
@@ -66,7 +72,11 @@ export function MarketCard({ market, onSelect }: MarketCardProps) {
               ? market.outcome
                 ? "YES"
                 : "NO"
-              : `${daysLeft}d left`}
+              : market.status === "closed"
+              ? "Closed"
+              : daysLeft > 0
+              ? `${daysLeft}d left`
+              : "Ended"}
           </span>
         </div>
       </div>

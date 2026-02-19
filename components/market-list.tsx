@@ -17,7 +17,7 @@ interface MarketListProps {
   onSelectMarket: (market: Market) => void
 }
 
-type FilterCategory = "all" | "tvl" | "protocol" | "supply" | "governance" | "ecosystem"
+type FilterCategory = "all" | "tvl" | "protocol" | "supply" | "governance" | "ecosystem" | "closed"
 
 export function MarketList({ onSelectMarket }: MarketListProps) {
   const [search, setSearch] = useState("")
@@ -38,8 +38,23 @@ export function MarketList({ onSelectMarket }: MarketListProps) {
       market.question.toLowerCase().includes(searchLower) ||
       market.category.toLowerCase().includes(searchLower) ||
       getCategoryLabel(market.category).toLowerCase().includes(searchLower);
-    const matchesCategory =
-      category === "all" || market.category === category
+    
+    // Filter by category
+    let matchesCategory = false;
+    if (category === "closed") {
+      // Show only closed markets that are less than 1 week old
+      const deadlineDate = new Date(market.deadline);
+      const now = new Date();
+      const daysSinceClosed = Math.floor((now.getTime() - deadlineDate.getTime()) / (1000 * 60 * 60 * 24));
+      matchesCategory = market.status === "closed" && daysSinceClosed <= 7;
+    } else if (category === "all") {
+      // In "all", exclude closed markets (they have their own tab)
+      matchesCategory = market.status !== "closed";
+    } else {
+      // Other categories: match category and exclude closed
+      matchesCategory = market.category === category && market.status !== "closed";
+    }
+    
     return matchesSearch && matchesCategory
   })
 
@@ -118,6 +133,9 @@ export function MarketList({ onSelectMarket }: MarketListProps) {
           </TabsTrigger>
           <TabsTrigger value="ecosystem" className="text-xs px-3 py-1">
             Ecosystem
+          </TabsTrigger>
+          <TabsTrigger value="closed" className="text-xs px-3 py-1">
+            Closed
           </TabsTrigger>
         </TabsList>
       </Tabs>

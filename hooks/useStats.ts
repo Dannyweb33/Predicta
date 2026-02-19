@@ -12,7 +12,7 @@ export function useStats() {
 
   const activeMarkets = markets.filter((m) => m.status === 'active').length;
 
-  // TODO: Buscar número de traders únicos do contrato
+  // TODO: Fetch unique traders count from contract
   const uniqueTraders = 0; // Placeholder - precisa de evento ou mapping no contrato
 
   const tvlLocked = markets

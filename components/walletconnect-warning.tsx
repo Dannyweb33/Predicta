@@ -13,9 +13,9 @@ export function WalletConnectWarning() {
   return (
     <Alert className="mx-auto max-w-7xl mb-4 border-yellow-500/50 bg-yellow-500/10">
       <AlertTriangle className="h-4 w-4 text-yellow-500" />
-      <AlertTitle className="text-yellow-500">WalletConnect não configurado</AlertTitle>
+      <AlertTitle className="text-yellow-500">WalletConnect Not Configured</AlertTitle>
       <AlertDescription className="text-yellow-500/80">
-        Para conectar carteiras, configure o NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID no arquivo .env.local.
+        To connect wallets, configure NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID in your .env.local file.
         <br />
         <a 
           href="https://cloud.walletconnect.com" 
@@ -23,7 +23,7 @@ export function WalletConnectWarning() {
           rel="noopener noreferrer"
           className="underline hover:text-yellow-400"
         >
-          Obtenha seu Project ID aqui
+          Get your Project ID here
         </a>
       </AlertDescription>
     </Alert>

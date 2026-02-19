@@ -12,7 +12,7 @@ export function useUserPositions() {
   const { count } = useMarketCount();
   const { markets } = useAllMarkets();
 
-  // Buscar todos os market IDs do usuário
+  // Fetch all market IDs for the user
   const { data: userMarketsData, isLoading } = useReadContracts({
     contracts: address && count > 0 && configured
       ? Array.from({ length: count }, (_, i) => ({
@@ -48,7 +48,7 @@ export function useUserPositions() {
           const marketId = Number(position.marketId);
           const marketData = markets.find((m) => m.id === marketId);
           
-          // Calcular payout potencial baseado no mercado atual
+          // Calculate potential payout based on current market
           let potentialPayout = Number(formatUnits(position.amount, 6));
           if (marketData) {
             const totalPool = marketData.totalYes + marketData.totalNo;

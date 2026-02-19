@@ -16,7 +16,7 @@
 ### 2. Contratos (só se quiser apostar a sério na testnet)
 
 - **Só para ver a app a correr:** não precisas de fazer deploy. A app usa dados mock e mostra um aviso a dizer que os contratos não estão configurados.
-- **Para apostar na Arc Testnet:** precisas de fazer deploy dos contratos, ter ETH para gas, e preencher os endereços no `.env.local` (ver README).
+- **Para apostar na Arc Testnet:** precisas de fazer deploy dos contratos, ter USDC (sUUSDC) para gas fees e apostas, e preencher os endereços no `.env.local` (ver README).
 
 ---
 
@@ -67,7 +67,7 @@ Deves ver a app ArcSignal. Consegues:
 |--------------------|----------------|
 | Só ver a app a correr | `pnpm install` → configurar `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` em `.env.local` → `pnpm dev` |
 | Conectar carteira | WalletConnect Project ID no `.env.local` |
-| Apostar na testnet | Deploy dos contratos + ETH na Arc Testnet + endereços no `.env.local` |
+| Apostar na testnet | Deploy dos contratos + USDC (sUUSDC) na Arc Testnet + endereços no `.env.local` |
 
 ---
 

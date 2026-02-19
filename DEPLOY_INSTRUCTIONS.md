@@ -49,7 +49,7 @@ forge script script/Deploy.s.sol:DeployScript \
 ## Checklist antes do Deploy
 
 - [ ] PRIVATE_KEY configurada no `.env.local`
-- [ ] ETH na Arc Testnet para gas fees
+- [ ] USDC (sUUSDC) na Arc Testnet para gas fees e transações
 - [ ] Contratos compilados (`forge build`)
 - [ ] RPC URL configurada
 
